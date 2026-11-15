@@ -11,18 +11,23 @@ namespace RW {
     
     class Player {
     private:
-        // Player Textures
-        SDL_Texture runTex ;
-        SDL_Texture jumpTex ;
-        SDL_Texture jumpFallTex ;
-        SDL_Texture idleTex ;
+        // Booleans
+        bool bLoadFailed = false ;
         
-        // SDL Variables
-        SDL_Renderer *rnd = nullptr ;
+        // Player Textures
+        SDL_Texture *runTex = nullptr ;
+        SDL_Texture *jumpTex = nullptr ;
+        SDL_Texture *jumpFallTex = nullptr ;
+        SDL_Texture *idleTex = nullptr ;
+        
+        // Texture Locations
         std::string runTexLoc ;
         std::string jumpTexLoc ;
         std::string jumpFallTexLoc ;
         std::string idleTexLoc ;
+        
+        // SDL Variables
+        SDL_Renderer *rnd = nullptr ;
         
         // Velocity & Speed
         float nSpeed = 10.0f ;
@@ -30,7 +35,7 @@ namespace RW {
         
     public:
         // Constructor
-        Player(SDL_Renderer &rnd, std::string runTexLocation = "", std::string jumpTexLocation = "", std::string idleTexLocation = "") ;
+        Player(SDL_Renderer *&rnd, std::string runTexLocation = "", std::string jumpTexLocation = "", std::string jumpFallTexLocation = "", std::string idleTexLocation = "") ;
         // Destructor
         ~Player() ;
         
@@ -39,13 +44,14 @@ namespace RW {
         // Setters
         Player &setRunTexLocation(std::string location) noexcept ;
         Player &setJumpTexLocation(std::string location) noexcept ;
+        Player &setJumpFallTexLocation(std::string location) noexcept ;
         Player &setIdleTexLocaiton(std::string location) noexcept ;
         
         // Functions
         void jump() ;
         void render() ;
         void update() ;
-        void initTextures() ;
+        bool initTextures() ;
     };
 }
 
