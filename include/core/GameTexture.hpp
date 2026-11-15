@@ -19,6 +19,7 @@ namespace RW {
         SDL_Texture *jumpTex = nullptr ;
         SDL_Texture *jumpFallTex = nullptr ;
         SDL_Texture *idleTex = nullptr ;
+        SDL_Texture *currentTex = nullptr ;
         
         // Texture Locations
         std::string runTexLoc ;
@@ -26,13 +27,40 @@ namespace RW {
         std::string jumpFallTexLoc ;
         std::string idleTexLoc ;
         
+        // Texture Frame Counts
+        const int RUN_FRAMES = 10 ;
+        const int JUMP_FRAMES = 3 ;
+        const int JUMPFALL_FRAMES = 2 ;
+        const int IDLE_FRAMES = 10 ;
+        
+        // Animtaion Variables
+        int nFrameCount = 1 ;
+        int nCurrentFrame = 0;
+        float fTimer = 0.0f ;
+        const float FRAME_TIME = 0.1f ;
+        const int W_FRAME = 120 ;
+        const int H_FRAME = 80 ;
+        
         // SDL Variables
         SDL_Renderer *rnd = nullptr ;
         
         // Velocity & Speed
-        float nSpeed = 10.0f ;
-        float nGravity = 2.4f ;
+        const float fGravity = 100.4f ;
+        const float GROUND_Y = 600 ;
+        float fPlayerGravity = 0 ;
         
+        // Player Variables
+        SDL_FRect sourceRect {0, 0, (float) W_FRAME, (float) H_FRAME};
+        SDL_FRect locationRect {200, GROUND_Y, (float) W_FRAME, (float) H_FRAME} ;
+        struct PlayerStatus {
+            bool bIdle, bJump, bRun, bDeath ;
+            // Constrcutor
+            PlayerStatus(bool idle = true, bool jump = false, bool run = false, bool death = false) 
+                : bIdle(idle), bJump(jump), bRun(run), bDeath(death) {}
+        }; PlayerStatus pStatus ;
+        
+        // Functions
+        void animate(float dt) ;
     public:
         // Constructor
         Player(SDL_Renderer *&rnd, std::string runTexLocation = "", std::string jumpTexLocation = "", std::string jumpFallTexLocation = "", std::string idleTexLocation = "") ;
@@ -48,10 +76,11 @@ namespace RW {
         Player &setIdleTexLocaiton(std::string location) noexcept ;
         
         // Functions
-        void jump() ;
+        void jump(float dt) ;
         void render() ;
-        void update() ;
+        void update(float dt) ;
         bool initTextures() ;
+        void start() ;
     };
 }
 
