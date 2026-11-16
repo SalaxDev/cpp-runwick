@@ -73,7 +73,7 @@ namespace RW {
         Player &setRunTexLocation(std::string location) noexcept ;
         Player &setJumpTexLocation(std::string location) noexcept ;
         Player &setJumpFallTexLocation(std::string location) noexcept ;
-        Player &setIdleTexLocaiton(std::string location) noexcept ;
+        Player &setIdleTexLocation(std::string location) noexcept ;
         
         // Functions
         void jump(float dt) ;

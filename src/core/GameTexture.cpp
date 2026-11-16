@@ -77,7 +77,7 @@ Player &Player::setJumpFallTexLocation(std::string location) noexcept {
     return *this ;
 }
 
-Player &Player::setIdleTexLocaiton(std::string location) noexcept {
+Player &Player::setIdleTexLocation(std::string location) noexcept {
     if (!location.empty()) {
         idleTexLoc = location ;
     } else {
