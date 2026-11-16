@@ -35,7 +35,7 @@ namespace RW {
         
         // Animtaion Variables
         int nFrameCount = 1 ;
-        int nCurrentFrame = 0;
+        int nCurrentFrame = 0 ;
         float fTimer = 0.0f ;
         const float FRAME_TIME = 0.075f ;
         const int W_FRAME = 120 ;

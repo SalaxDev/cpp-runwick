@@ -14,7 +14,6 @@ void Player::animate(float dt) {
         if (nFrameCount != JUMPFALL_FRAMES) {
             nCurrentFrame = (nCurrentFrame + 1) % nFrameCount ;
         } else {
-            SDL_Log("Frame: %d\n", nCurrentFrame) ;
             if (nCurrentFrame < JUMPFALL_FRAMES - 1) {
                 nCurrentFrame++ ;
             }
