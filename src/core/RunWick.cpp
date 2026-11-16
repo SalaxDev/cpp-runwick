@@ -7,26 +7,56 @@ bool RunWick::initWindow() {
     if (bInitFailed) return false ;
     
     if (wnd) SDL_DestroyWindow(wnd) ;
-    SDL_Window *wnd = SDL_CreateWindow(sWindow.name.c_str(), sWindow.nWidth, sWindow.nHeight, 0) ;
+    wnd = SDL_CreateWindow(sWindow.name.c_str(), sWindow.nWidth, sWindow.nHeight, 0) ;
     if (!wnd) {
         logError("create window") ;
         return false ;
     }
     
     if (rnd) SDL_DestroyRenderer(rnd) ;
-    SDL_Renderer *rnd = SDL_CreateRenderer(wnd, nullptr) ;
+    rnd = SDL_CreateRenderer(wnd, nullptr) ;
     if (!rnd) {
         logError("create renderer") ;
         return false ;
     }
+    
+    SDL_SetDefaultTextureScaleMode(rnd, SDL_SCALEMODE_PIXELART) ;
     
     // TO-DO: Add Window icon using surface
     
     return true ;
 }
 
+// Player Variables Initialization
+bool RunWick::initPlayer() {
+    if (bInitFailed) {
+        SDL_Log("Initialization Failed in previous functions, can't call %s\n", __FUNCTION__) ;
+        return false ;
+    }
+    
+    // Checking if renderer is exist or not
+    if (!rnd) {
+        SDL_Log("Renderer is not initialized - [%s]\n", __FUNCTION__) ;
+        return false ;
+    }
+    
+    player.setRenderer(rnd) ;
+    
+    // Loading Textures
+    player.setIdleTexLocation("./data/character/knight/idle/idle.png")
+        .setRunTexLocation("./data/character/knight/run/run.png")
+        .setJumpTexLocation("./data/character/knight/jump/jump.png")
+        .setJumpFallTexLocation("./data/character/knight/jump/jump_fall.png") ;
+    // Checking for errors
+    if (!player.initTextures()) {
+        return false ;
+    }
+    
+    return true ;
+}
+
 // Events
-void RunWick::updateEvent() {
+void RunWick::updateEvent(float dt) {
     // Event Loop
     while (SDL_PollEvent(&evn)) {
         switch(evn.type) {
@@ -38,9 +68,19 @@ void RunWick::updateEvent() {
             
             // Key Events
             case SDL_EVENT_KEY_DOWN: {
+                SDL_Log("key= %s, scancode: %s\n",
+                        SDL_GetKeyName(evn.key.key),
+                        SDL_GetScancodeName(evn.key.scancode)
+                );
                 switch(evn.key.scancode) {
                     case SDL_SCANCODE_ESCAPE: {
                         bRunning = false ;
+                        break ;
+                    }
+                    
+                    // Enter key?
+                    case SDL_SCANCODE_RETURN: {
+                        
                         break ;
                     }
                     
@@ -52,14 +92,20 @@ void RunWick::updateEvent() {
             default: break ;
         }
     }
+    
+    now = SDL_GetTicksNS() ;
+    dt = (now - last) / 1'000'000'000.f ;
+    player.update(dt) ;
 }
 
 // Render Update
 void RunWick::updateRender() {
     SDL_RenderClear(rnd) ;
     
+    player.render() ;
+    
     SDL_RenderPresent(rnd) ;
-    if (sWindow.nDefaultFPS > 0) SDL_Delay(1000 / 60) ;
+    if (sWindow.nDefaultFPS > 0) SDL_Delay(1000 / sWindow.nDefaultFPS) ;
 }
 
 void RunWick::msgShow(MsgStats state, const char *message, const char *title) {
@@ -133,12 +179,14 @@ void RunWick::init() {
     
     if (!initWindow()) {
         bInitFailed = true ;
-        bInited = true ;
-        return ;
     }
     
-    bInitFailed = false ;
+    if (!initPlayer()) {
+        bInitFailed = true ;
+    }
+    
     bInited = true ;
+    return ;
 }
 
 // Game Loop
@@ -153,8 +201,11 @@ void RunWick::run() {
         return ;
     }
     
+    last = SDL_GetTicksNS() ;
     while(bRunning) {
-        updateEvent() ;
+        updateEvent(dt) ;
+        last = now ;
         updateRender() ;
+        
     }
 }

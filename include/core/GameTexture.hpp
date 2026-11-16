@@ -37,7 +37,7 @@ namespace RW {
         int nFrameCount = 1 ;
         int nCurrentFrame = 0;
         float fTimer = 0.0f ;
-        const float FRAME_TIME = 0.1f ;
+        const float FRAME_TIME = 0.075f ;
         const int W_FRAME = 120 ;
         const int H_FRAME = 80 ;
         
@@ -45,13 +45,13 @@ namespace RW {
         SDL_Renderer *rnd = nullptr ;
         
         // Velocity & Speed
-        const float fGravity = 100.4f ;
-        const float GROUND_Y = 600 ;
+        const float fGravity = 1200.4f ;
+        const float GROUND_Y = 400 ;
         float fPlayerGravity = 0 ;
         
         // Player Variables
         SDL_FRect sourceRect {0, 0, (float) W_FRAME, (float) H_FRAME};
-        SDL_FRect locationRect {200, GROUND_Y, (float) W_FRAME, (float) H_FRAME} ;
+        SDL_FRect locationRect {100, GROUND_Y, (float) W_FRAME * 1.5f, (float) H_FRAME * 1.5f} ;
         struct PlayerStatus {
             bool bIdle, bJump, bRun, bDeath ;
             // Constrcutor
@@ -61,9 +61,12 @@ namespace RW {
         
         // Functions
         void animate(float dt) ;
+        
+        // Helper
+        void setDefaultTex(SDL_Texture *&tex, const int &frame_count) ;
     public:
         // Constructor
-        Player(SDL_Renderer *&rnd, std::string runTexLocation = "", std::string jumpTexLocation = "", std::string jumpFallTexLocation = "", std::string idleTexLocation = "") ;
+        Player(SDL_Renderer *rnd = nullptr, std::string runTexLocation = "", std::string jumpTexLocation = "", std::string jumpFallTexLocation = "", std::string idleTexLocation = "") ;
         // Destructor
         ~Player() ;
         
@@ -74,6 +77,7 @@ namespace RW {
         Player &setJumpTexLocation(std::string location) noexcept ;
         Player &setJumpFallTexLocation(std::string location) noexcept ;
         Player &setIdleTexLocation(std::string location) noexcept ;
+        Player &setRenderer(SDL_Renderer *&rnd) ;
         
         // Functions
         void jump(float dt) ;

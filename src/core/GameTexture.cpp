@@ -11,12 +11,32 @@ void Player::animate(float dt) {
         fTimer -= FRAME_TIME ;
         
         sourceRect.x = W_FRAME * (nCurrentFrame % nFrameCount) ;
-        nCurrentFrame = (nCurrentFrame + 1) % nFrameCount ;
+        if (nFrameCount != JUMPFALL_FRAMES) {
+            nCurrentFrame = (nCurrentFrame + 1) % nFrameCount ;
+        } else {
+            SDL_Log("Frame: %d\n", nCurrentFrame) ;
+            if (nCurrentFrame < JUMPFALL_FRAMES - 1) {
+                nCurrentFrame++ ;
+            }
+        }
     }
 }
 
+// Helper
+void Player::setDefaultTex(SDL_Texture *&tex, const int &frame_count) {
+    if (currentTex == tex) [[likely]] {
+        return ;
+    }
+    
+    currentTex = tex ;
+    nCurrentFrame = 0 ;
+    nFrameCount = frame_count ;
+    fTimer = 0.f ;
+    sourceRect.x = 0.f ;
+}
+
 // Constructor
-Player::Player(SDL_Renderer *&rnd, std::string runTexLocation, std::string jumpTexLocation, std::string jumpFallTexLocation, std::string idleTexLocation)
+Player::Player(SDL_Renderer *rnd, std::string runTexLocation, std::string jumpTexLocation, std::string jumpFallTexLocation, std::string idleTexLocation)
     : rnd(rnd), runTexLoc(std::move(runTexLocation)), jumpTexLoc(std::move(jumpTexLocation)),
     jumpFallTexLoc(std::move(jumpFallTexLocation)), idleTexLoc(std::move(idleTexLocation)) {
     
@@ -86,14 +106,18 @@ Player &Player::setIdleTexLocation(std::string location) noexcept {
     return *this ;
 }
 
+Player &Player::setRenderer(SDL_Renderer *&renderer) {
+    rnd = renderer ;
+    return *this ;
+}
+
 
 // Functions
 void Player::jump(float dt) {
-    fPlayerGravity = -470.f ;
+    fPlayerGravity = -710.f ;
 }
 
 void Player::render() {
-    
     SDL_RenderTexture(rnd, currentTex, &sourceRect, &locationRect) ;
 }
 
@@ -107,23 +131,20 @@ void Player::update(float dt) {
     bool bSpaceK = keys[SDL_SCANCODE_SPACE] ;
     if (bSpaceK && !pStatus.bJump) {
         pStatus.bJump = true ;
+        pStatus.bIdle = false ;
+        pStatus.bRun = false ;
         jump(dt) ;
     }
     
     if (pStatus.bIdle) {
-        currentTex = idleTex ;
-        nFrameCount = IDLE_FRAMES ;
+        setDefaultTex(idleTex, IDLE_FRAMES) ;
     } else if (pStatus.bRun) {
-        currentTex = runTex ;
-        nFrameCount = RUN_FRAMES ;
+        setDefaultTex(runTex, RUN_FRAMES) ;
     } else if (pStatus.bJump) {
-        currentTex = (fPlayerGravity > 0.f) ? jumpFallTex : jumpTex ;
         if (fPlayerGravity > 0.f) {
-            currentTex = jumpFallTex ;
-            nFrameCount = JUMPFALL_FRAMES ;
+            setDefaultTex(jumpFallTex, JUMPFALL_FRAMES) ;
         } else {
-            currentTex = jumpTex ;
-            nFrameCount = JUMP_FRAMES ;
+            setDefaultTex(jumpTex, JUMP_FRAMES) ;
         }
     } else if (pStatus.bDeath) {
         // TODO: Implement Death animation and health in later
@@ -133,7 +154,7 @@ void Player::update(float dt) {
     if (pStatus.bJump) {
         locationRect.y += fPlayerGravity * dt ;
         
-        fPlayerGravity += fGravity * dt ;
+        fPlayerGravity += fGravity * dt * 1.15f;
     }
     
     
@@ -142,6 +163,7 @@ void Player::update(float dt) {
         locationRect.y = GROUND_Y ;
         fPlayerGravity = 0.f ;
         pStatus.bJump = false ;
+        pStatus.bRun = true ;
     }
     
     animate(dt) ;

@@ -4,6 +4,8 @@
 #include <SDL3/SDL.h>
 #include <SDL3_image/SDL_image.h>
 
+
+#include "GameTexture.hpp"
 #include "Settings.hpp"
 
 class RunWick {
@@ -30,13 +32,23 @@ private:
     // Images & Textures
     SDL_Surface *surface = nullptr ;
     
+    // Player Class
+    RW::Player player ;
+    
     // Event Handler
     SDL_Event evn ;
     
+    // Timer & dt
+    Uint64 last, now;
+    float dt ;
+    
     // Private Functions
     bool initWindow() ; // Initialization
-    void updateEvent() ; // Events
+    bool initPlayer() ; // Player Variables Initialization
+    void updateEvent(float dt) ; // Events
     void updateRender() ;
+    
+    // Loggers
     void msgShow(MsgStats state, const char *message, const char *title) ;
     void logError(const char *cause, bool getSDLError = true) ;
 public:
