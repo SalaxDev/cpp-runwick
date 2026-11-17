@@ -91,7 +91,7 @@ namespace RW {
         
         // Velocity & Speed
         const float fGravity = 1200.4f ;
-        const float GROUND_Y = 400 ;
+        const float GROUND_Y = 380 ;
         float fPlayerGravity = 0 ;
         
         // Player Variables
