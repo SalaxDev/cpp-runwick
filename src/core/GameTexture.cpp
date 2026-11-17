@@ -57,7 +57,7 @@ Background &Background::setSkySize(int width, int height) {
 }
 
 Background &Background::setGroundSize(int width, int height) {
-    groundRect = {0, height - 100.f - 100, (float) width, (float) 100} ;
+    groundRect = {0, height - 100.f, (float) width, (float) 100} ;
     groundRect2 = {(float) groundRect.w, groundRect.y, groundRect.w, 100} ;
     return *this ;
 }
