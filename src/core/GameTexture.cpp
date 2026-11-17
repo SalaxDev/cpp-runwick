@@ -4,6 +4,115 @@
 
 using namespace RW ;
 
+
+// Background Class
+
+// Constructor
+Background::Background(SDL_Renderer *rnd, std::string skyTexLocation, std::string groundTexLocation)
+    : rnd(rnd), skyTexLoc((std::move(skyTexLocation))), groundTexLoc(std::move(groundTexLocation)) {
+    
+}
+
+// Destructor
+Background::~Background() {
+    if (skyTex) {
+        SDL_DestroyTexture(skyTex) ;
+        skyTex = nullptr ;
+    }
+    
+    if (groundTex) {
+        SDL_DestroyTexture(groundTex) ;
+        groundTex = nullptr ;
+    }
+}
+
+
+// Setters
+Background &Background::setSkyTexLocation(std::string location) {
+    if (location.empty()) {
+        SDL_Log("Provided Location is empty %s\n", __FUNCTION__) ;
+    }
+    skyTexLoc = location ;
+    return *this ;
+}
+
+Background &Background::setGroundTexLocation(std::string location) {
+    if (location.empty()) {
+        SDL_Log("Provided Location is empty %s\n", __FUNCTION__) ;
+    }
+    groundTexLoc = location ;
+    return *this ;
+}
+
+Background &Background::setRenderer(SDL_Renderer *&renderer) {
+    rnd = renderer ;
+    return *this ;
+}
+
+// Size Setter
+Background &Background::setSkySize(int width, int height) {
+    skyRect = {0, 0, (float) width, (float) height - 100} ;
+    skyRect2 = {skyRect.w, skyRect.y, skyRect.w, skyRect.h} ;
+    return *this ;
+}
+
+Background &Background::setGroundSize(int width, int height) {
+    groundRect = {0, height - 100.f - 100, (float) width, (float) 100} ;
+    groundRect2 = {(float) groundRect.w, groundRect.y, groundRect.w, 100} ;
+    return *this ;
+}
+
+
+// Getters
+
+// Functions
+bool Background::initTextures() {
+    if (!rnd) { // Checks if renderer is not set
+        SDL_Log("Provided renderer is null: [%s]\n", __FUNCTION__) ;
+        bLoadFailed = true ;
+        return false ;
+    }
+    
+    // Loading Textures
+    skyTex = IMG_LoadTexture(rnd, skyTexLoc.c_str()) ;
+    if (!skyTex) {
+        SDL_Log("Failed to Load sky Texture!: %s\n", SDL_GetError()) ;
+        bLoadFailed = true ;
+        return false ;
+    }
+    
+    groundTex = IMG_LoadTexture(rnd, groundTexLoc.c_str()) ;
+    if (!groundTex) {
+        SDL_Log("Failed to Load Ground Texture!: %s\n", SDL_GetError()) ;
+        bLoadFailed = true ;
+        return false ;
+    }
+    
+    return true ;    
+}
+
+void Background::update(float dt) {
+    if (bLoadFailed) [[unlikely]] {
+        SDL_Log("Failed to properly load textures!, SDL Error: %s\n", SDL_GetError()) ;
+        return ;
+    }
+    
+    
+}
+
+void Background::render() {
+    // Rendering sky texture
+    SDL_RenderTexture(rnd, skyTex, nullptr, &skyRect) ;
+    SDL_RenderTexture(rnd, skyTex, nullptr, &skyRect2) ;
+    
+    // Rendering ground texture
+    SDL_RenderTexture(rnd, groundTex, nullptr, &groundRect) ;
+    SDL_RenderTexture(rnd, groundTex, nullptr, &groundRect2) ; 
+}
+
+
+// Player Class
+
 // Functions
 void Player::animate(float dt) {
     fTimer += dt ;
@@ -121,7 +230,7 @@ void Player::render() {
 }
 
 void Player::update(float dt) {
-    if (bLoadFailed) {
+    if (bLoadFailed) [[unlikely]] {
         SDL_Log("Failed to properly load textures!, SDL Error: %s\n", SDL_GetError()) ;
         return ;
     }

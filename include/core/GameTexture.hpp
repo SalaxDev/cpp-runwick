@@ -6,7 +6,52 @@
 
 namespace RW {
     class Background {
+    private:
+        // Booleans
+        bool bLoadFailed = false ;
         
+        // SDL Variables
+        SDL_Renderer *rnd = nullptr ;
+        
+        // Textures
+        SDL_Texture *skyTex = nullptr ;
+        SDL_Texture *groundTex = nullptr ;
+        
+        std::string skyTexLoc ;
+        std::string groundTexLoc ;
+        
+        // Texture Rectangle
+        SDL_FRect skyRect ;
+        SDL_FRect skyRect2 ;
+        SDL_FRect groundRect ;
+        SDL_FRect groundRect2 ;
+        
+        // Velocity
+        const float V_SKY = 210.f ;
+        const float V_BG = 190.f ;
+        
+        // Private Functions
+        
+    public:
+        // Constructor
+        Background(SDL_Renderer *rnd = nullptr, std::string skyTexLocation = "", std::string groundTexLocation = "") ;
+        // Destructor
+        ~Background() ;
+        
+        // Setters
+        Background &setSkyTexLocation(std::string location) ;
+        Background &setGroundTexLocation(std::string location) ;
+        Background &setRenderer(SDL_Renderer *&rnd) ;
+        // Size Setter
+        Background &setSkySize(int width, int height) ;
+        Background &setGroundSize(int width, int height) ;
+        
+        // Getters
+        
+        // Functions
+        bool initTextures() ;
+        void update(float dt) ;
+        void render() ;
     };
     
     class Player {
