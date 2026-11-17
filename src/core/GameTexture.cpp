@@ -97,7 +97,28 @@ void Background::update(float dt) {
         return ;
     }
     
+    groundRect.x -= V_BG * dt ;
+    groundRect2.x -= V_BG * dt ;
     
+    skyRect.x -= V_SKY * dt ;
+    skyRect2.x -= V_SKY * dt ;
+    
+    
+    if (groundRect.x + groundRect.w <= 0) {
+        groundRect.x = groundRect2.x + groundRect2.w ;
+    }
+    
+    if (groundRect2.x + groundRect2.w <= 0) {
+        groundRect2.x = groundRect.x + groundRect.w ;
+    }
+    
+    if (skyRect.x + skyRect.w <= 0) {
+        skyRect.x = skyRect2.x + skyRect2.w ;
+    }
+    
+    if (skyRect2.x + skyRect2.w <= 0) {
+        skyRect2.x = skyRect.x + skyRect.w ;
+    }
 }
 
 void Background::render() {
