@@ -32,8 +32,9 @@ private:
     // Images & Textures
     SDL_Surface *surface = nullptr ;
     
-    // Player Class
+    // Player & Background Class
     RW::Player player ;
+    RW::Background bg ;
     
     // Event Handler
     SDL_Event evn ;
@@ -45,6 +46,7 @@ private:
     // Private Functions
     bool initWindow() ; // Initialization
     bool initPlayer() ; // Player Variables Initialization
+    bool initBackground() ; // Background Variables Initialization
     void updateEvent(float dt) ; // Events
     void updateRender() ;
     

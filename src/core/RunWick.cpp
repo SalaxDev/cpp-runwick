@@ -42,6 +42,7 @@ bool RunWick::initPlayer() {
     
     player.setRenderer(rnd) ;
     
+    
     // Loading Textures
     player.setIdleTexLocation("./data/character/knight/idle/idle.png")
         .setRunTexLocation("./data/character/knight/run/run.png")
@@ -49,6 +50,31 @@ bool RunWick::initPlayer() {
         .setJumpFallTexLocation("./data/character/knight/jump/jump_fall.png") ;
     // Checking for errors
     if (!player.initTextures()) {
+        return false ;
+    }
+    
+    return true ;
+}
+
+// Background Variables Initialization
+bool RunWick::initBackground() {
+    if (bInitFailed) {
+        SDL_Log("Initialization Failed in previous functions, can't call %s\n", __FUNCTION__) ;
+        return false ;
+    }
+    
+    // Checking if renderer is exist or not
+    if (!rnd) {
+        SDL_Log("Renderer is not initialized - [%s]\n", __FUNCTION__) ;
+        return false ;
+    }
+    
+    bg.setRenderer(rnd) ;
+    
+    bg.setGroundTexLocation("./data/background/ground.png")
+        .setSkyTexLocation("./data/background/sky.png") ;
+    
+    if (!bg.initTextures()) {
         return false ;
     }
     
@@ -95,7 +121,9 @@ void RunWick::updateEvent(float dt) {
     
     now = SDL_GetTicksNS() ;
     dt = (now - last) / 1'000'000'000.f ;
+    if (dt >= 0.25f) [[unlikely]] { dt = 0.25 ; }
     player.update(dt) ;
+    bg.update(dt) ;
 }
 
 // Render Update
@@ -103,6 +131,7 @@ void RunWick::updateRender() {
     SDL_RenderClear(rnd) ;
     
     player.render() ;
+    bg.render() ;
     
     SDL_RenderPresent(rnd) ;
     if (sWindow.nDefaultFPS > 0) SDL_Delay(1000 / sWindow.nDefaultFPS) ;
@@ -116,7 +145,7 @@ void RunWick::msgShow(MsgStats state, const char *message, const char *title) {
             break ;
         }
         
-        case ERROR: {
+        case ERROR: [[likely]] {
             SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, title, message, nullptr) ;
             break ;
         }
@@ -185,6 +214,10 @@ void RunWick::init() {
         bInitFailed = true ;
     }
     
+    if (!initBackground()) {
+        bInitFailed = true ;
+    }
+    
     bInited = true ;
     return ;
 }
@@ -201,8 +234,11 @@ void RunWick::run() {
         return ;
     }
     
+    
+    bg.setGroundSize(sWindow.nWidth, sWindow.nHeight) ;
+    bg.setSkySize(sWindow.nWidth, sWindow.nHeight) ;
     last = SDL_GetTicksNS() ;
-    while(bRunning) {
+    while(bRunning) [[likely]] {
         updateEvent(dt) ;
         last = now ;
         updateRender() ;
