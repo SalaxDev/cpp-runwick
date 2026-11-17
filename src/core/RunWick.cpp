@@ -130,8 +130,8 @@ void RunWick::updateEvent(float dt) {
 void RunWick::updateRender() {
     SDL_RenderClear(rnd) ;
     
-    player.render() ;
     bg.render() ;
+    player.render() ;
     
     SDL_RenderPresent(rnd) ;
     if (sWindow.nDefaultFPS > 0) SDL_Delay(1000 / sWindow.nDefaultFPS) ;
