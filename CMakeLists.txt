@@ -102,6 +102,10 @@ add_executable(runwick
     ${source_file}
 )
 
+if(WIN32)
+    target_sources(runwick PRIVATE "resources/runwick.rc")
+endif()
+
 # Including Directories
 target_include_directories(runwick PRIVATE
     "include/core"
