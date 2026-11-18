@@ -16,6 +16,7 @@ private:
     bool bInited = false ;
     bool bInitFailed = false ;
     bool bRunning = true ;
+    bool bStart = false ;
     
     // MessageBox Settings
     enum class MsgStats {

@@ -106,6 +106,10 @@ void RunWick::updateEvent(float dt) {
                     
                     // Enter key?
                     case SDL_SCANCODE_RETURN: {
+                        if (!bStart) {
+                            player.start() ;
+                            bStart = true ;
+                        }
                         
                         break ;
                     }
@@ -122,8 +126,11 @@ void RunWick::updateEvent(float dt) {
     now = SDL_GetTicksNS() ;
     dt = (now - last) / 1'000'000'000.f ;
     if (dt >= 0.25f) [[unlikely]] { dt = 0.25 ; }
+    
     player.update(dt) ;
-    bg.update(dt) ;
+    if (bStart) [[likely]] {
+        bg.update(dt) ;
+    }
 }
 
 // Render Update
