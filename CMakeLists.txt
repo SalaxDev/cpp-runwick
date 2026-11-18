@@ -69,6 +69,31 @@ else()
     FetchContent_MakeAvailable(SDL3_image)
 endif()
 
+find_package(SDL3_ttf CONFIG QUIET)
+if (SDL3_ttf_FOUND)
+    message(STATUS "Found SDL3_ttf at: ${SDL3_ttf_DIR}")
+else()
+    message(STATUS "SDL3_ttf not found on system - downloading from source")
+    
+    set(SDL3_ttf_TAG "release-3.2.2")
+    
+    FetchContent_Declare(
+        SDL3_ttf
+        GIT_REPOSITORY  https://github.com/libsdl-org/SDL_image.git
+        GIT_TAG         ${SDL3_ttf_TAG}
+        GIT_SHALLOW TRUE
+    )
+    
+    set(SDL_IMAGE_SHARED          ON  CACHE BOOL "" FORCE)
+    set(SDL_IMAGE_STATIC          OFF CACHE BOOL "" FORCE)
+    set(SDL_IMAGE_TEST_LIBRARY    OFF CACHE BOOL "" FORCE)
+    set(SDL_IMAGE_TESTS           OFF CACHE BOOL "" FORCE)
+    set(SDL_IMAGE_EXAMPLES        OFF CACHE BOOL "" FORCE)
+    set(SDL_IMAGE_INSTALL         OFF CACHE BOOL "" FORCE)
+    
+    FetchContent_MakeAvailable(SDL3_ttf)
+endif()
+
 # Add Source files Using GLOB
 file(GLOB_RECURSE source_file CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*")
 message(STATUS "Found *.cpp sources:\n${source_file}")
@@ -90,6 +115,7 @@ set_target_properties(runwick PROPERTIES OUTPUT_NAME "RUNWICK")
 target_link_libraries(runwick PRIVATE
     SDL3::SDL3
     SDL3_image::SDL3_image
+    SDL3_ttf::SDL3_ttf
 )
 
 # Custom Command for copying Libraries
