@@ -258,7 +258,7 @@ void Player::update(float dt) {
     
     const bool *keys = SDL_GetKeyboardState(nullptr) ;
     bool bSpaceK = keys[SDL_SCANCODE_SPACE] ;
-    if (bSpaceK && !pStatus.bJump) {
+    if (bSpaceK && !pStatus.bJump && !pStatus.bIdle) {
         pStatus.bJump = true ;
         pStatus.bIdle = false ;
         pStatus.bRun = false ;
@@ -347,6 +347,6 @@ void Player::start() {
     // Player Rect Reset
     sourceRect.x = 0 ;
     sourceRect.y = 0 ;
-    locationRect.x = 200 ;
+    locationRect.x = 100 ;
     locationRect.y = GROUND_Y ;
 }
