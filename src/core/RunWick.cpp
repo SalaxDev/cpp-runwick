@@ -22,7 +22,15 @@ bool RunWick::initWindow() {
     
     SDL_SetDefaultTextureScaleMode(rnd, SDL_SCALEMODE_PIXELART) ;
     
-    // TO-DO: Add Window icon using surface
+    // Load Icon
+    surface = SDL_LoadSurface("./data/icon/cpp_logo.png") ;
+    if (surface) {
+        SDL_SetWindowIcon(wnd, surface) ;
+    } else {
+        logError("load icon") ;
+        // Won't return false (minor problem)
+    }
+    
     
     return true ;
 }
