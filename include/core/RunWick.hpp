@@ -3,6 +3,7 @@
 
 #include <SDL3/SDL.h>
 #include <SDL3_image/SDL_image.h>
+#include <SDL3_ttf/SDL_ttf.h>
 
 
 #include "GameTexture.hpp"
@@ -17,6 +18,8 @@ private:
     bool bInitFailed = false ;
     bool bRunning = true ;
     bool bStart = false ;
+    // Todo: Add sounds and support both audio and no audio option
+    bool bNoAudio = false ; 
     
     // MessageBox Settings
     enum class MsgStats {
@@ -29,6 +32,10 @@ private:
     // SDL3 Variables
     SDL_Window *wnd = nullptr ;
     SDL_Renderer *rnd = nullptr ;
+    
+    // Fonts
+    TTF_Font *font = nullptr ;
+    const int FONT_SIZE = 20 ;
     
     // Images & Textures
     SDL_Surface *surface = nullptr ;
@@ -48,6 +55,7 @@ private:
     bool initWindow() ; // Initialization
     bool initPlayer() ; // Player Variables Initialization
     bool initBackground() ; // Background Variables Initialization
+    bool initFont() ; // Font Initialization
     void updateEvent(float dt) ; // Events
     void updateRender() ;
     

@@ -1,5 +1,6 @@
 #include "RunWick.hpp"
 #include <format>
+#include <stdexcept>
 
 // Private Functions
 // Initialization
@@ -23,7 +24,7 @@ bool RunWick::initWindow() {
     SDL_SetDefaultTextureScaleMode(rnd, SDL_SCALEMODE_PIXELART) ;
     
     // Load Icon
-    surface = SDL_LoadSurface("./data/icon/cpp_logo.png") ;
+    surface = SDL_LoadSurface("./data/logo/cpp_logo.png") ;
     if (surface) {
         SDL_SetWindowIcon(wnd, surface) ;
     } else {
@@ -85,6 +86,15 @@ bool RunWick::initBackground() {
     if (!bg.initTextures()) {
         return false ;
     }
+    
+    return true ;
+}
+
+// Font Initialization
+bool RunWick::initFont() {
+    // Todo: Add font load, check for errors and write "Press "Enter" Enter to Start" and diable the text
+    //TTF_OpenFont() ;
+    
     
     return true ;
 }
@@ -173,7 +183,7 @@ void RunWick::msgShow(MsgStats state, const char *message, const char *title) {
 }
 
 void RunWick::logError(const char *cause, bool getSDLError) {
-    SDL_Log("Failed to %s", std::format("{}{}", cause, getSDLError ? SDL_GetError() : "").c_str()) ;
+    SDL_Log("Failed to %s", std::format("{}: {}", cause, getSDLError ? SDL_GetError() : "").c_str()) ;
 }
 
 // Constructor
@@ -185,6 +195,11 @@ RunWick::RunWick(const WindowSettings windowSettings) : sWindow(windowSettings) 
 
 // Destructor
 RunWick::~RunWick() {
+    
+    if (font) {
+        TTF_CloseFont(font) ;
+        font = nullptr ;
+    }
     
     if (surface) {
         SDL_DestroySurface(surface) ;
@@ -215,10 +230,26 @@ void RunWick::setRenderColor(SDL_Color color) {
 }
 // Functions
 void RunWick::init() {
-    if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) { 
+    if (!SDL_Init(SDL_INIT_VIDEO)) { 
+        msgShow(MsgStats::ERROR, "Failed to initialize SDL3 VIDEO & AUDIO, Fallback to SW", "Initialization Error") ;
+        
+        // Experimental, not SW tested (no gpu)
+        SDL_SetHint(SDL_HINT_RENDER_DRIVER, "software") ;
+        if (!SDL_Init(SDL_INIT_VIDEO)) {
+            msgShow(MsgStats::ERROR, "Failed to Downgrade to SW", "Downgrade Failure") ;
+            throw std::runtime_error("Downgrade SW Failure") ;
+        }
+    }
+    
+    // Initializing Audio
+    if (!SDL_Init(SDL_INIT_AUDIO)) {
+        SDL_Log("No detected Audio or sound driver, game runs without sounds [%s]: %s\n", __FUNCTION__, SDL_GetError()) ;
+        bNoAudio = true ;
+    }
+    
+    if (!TTF_Init()) {
+        SDL_Log("Failed to Initialize TTF! [%s]: %s\n", __FUNCTION__, SDL_GetError()) ;
         bInitFailed = true ;
-        msgShow(MsgStats::ERROR, "Failed to initialize SDL3 VIDEO & AUDIO", "Initialization Error") ;
-        return ;
     }
     
     if (!initWindow()) {
