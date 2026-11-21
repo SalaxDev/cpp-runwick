@@ -151,3 +151,12 @@ add_custom_command(TARGET runwick POST_BUILD
     $<TARGET_FILE_DIR:runwick>/data
     COMMENT "Copying Data folder to $<TARGET_FILE_DIR:runwick>"
 )
+
+# Copy Game license
+
+add_custom_command(TARGET runwick POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    ${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.txt
+    $<TARGET_FILE_DIR:runwick>
+    COMMENT "Copying License to $<TARGET_FILE_DIR:runwick>"
+)
