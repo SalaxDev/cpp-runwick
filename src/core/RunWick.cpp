@@ -27,6 +27,10 @@ bool RunWick::initWindow() {
     surface = SDL_LoadSurface("./data/logo/cpp_logo.png") ;
     if (surface) {
         SDL_SetWindowIcon(wnd, surface) ;
+        
+        // Cleanup
+        SDL_DestroySurface(surface) ;
+        surface = nullptr ;
     } else {
         logError("load icon") ;
         // Won't return false (minor problem)
@@ -93,8 +97,31 @@ bool RunWick::initBackground() {
 // Font Initialization
 bool RunWick::initFont() {
     // Todo: Add font load, check for errors and write "Press "Enter" Enter to Start" and diable the text
-    //TTF_OpenFont() ;
     
+    font = TTF_OpenFont("./data/fonts/KaushanScript-Regular.otf", FONT_SIZE) ;
+    if (!font) {
+        logError("Load Font") ;
+        return false ;
+    }
+    
+    surface = TTF_RenderText_Blended(font, startMessage.c_str(), startMessage.length(), WHITE) ;
+    if (!surface) {
+        logError("load font texture") ;
+        return false ;
+    }
+    
+    fontTex = SDL_CreateTextureFromSurface(rnd, surface) ;
+    // Cleanup
+    SDL_DestroySurface(surface) ;
+    surface = nullptr ;
+    
+    // Center Alignment
+    float text_w, text_h ;
+    SDL_GetTextureSize(fontTex, &text_w, &text_h) ;
+    int wnd_w, wnd_h ;
+    SDL_GetWindowSize(wnd, &wnd_w, &wnd_h) ;
+    
+    fontRect = {(wnd_w - text_w) / 2.f, (wnd_h - text_h) / 2.f, text_w, text_h} ;
     
     return true ;
 }
@@ -127,6 +154,7 @@ void RunWick::updateEvent(float dt) {
                         if (!bStart) {
                             player.start() ;
                             bStart = true ;
+                            bShowStartMsg = false ;
                         }
                         
                         break ;
@@ -157,6 +185,10 @@ void RunWick::updateRender() {
     
     bg.render() ;
     player.render() ;
+    if (bShowStartMsg) [[unlikely]] {
+        SDL_RenderTexture(rnd, fontTex, nullptr, &fontRect) ;
+    }
+        
     
     SDL_RenderPresent(rnd) ;
     if (sWindow.nDefaultFPS > 0) SDL_Delay(1000 / sWindow.nDefaultFPS) ;
@@ -215,6 +247,7 @@ RunWick::~RunWick() {
         wnd = nullptr ;
     }
     
+    TTF_Quit() ;
     SDL_Quit() ;
 }
 // Getter
@@ -261,6 +294,10 @@ void RunWick::init() {
     }
     
     if (!initBackground()) {
+        bInitFailed = true ;
+    }
+    
+    if (!initFont()) {
         bInitFailed = true ;
     }
     

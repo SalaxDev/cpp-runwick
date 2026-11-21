@@ -18,6 +18,7 @@ private:
     bool bInitFailed = false ;
     bool bRunning = true ;
     bool bStart = false ;
+    bool bShowStartMsg = true ;
     // Todo: Add sounds and support both audio and no audio option
     bool bNoAudio = false ; 
     
@@ -35,10 +36,17 @@ private:
     
     // Fonts
     TTF_Font *font = nullptr ;
-    const int FONT_SIZE = 20 ;
+    const int FONT_SIZE = 40 ;
+    const SDL_Color WHITE {255, 255, 255, 200} ;
+    SDL_FRect fontRect ;
+    
+    // Messages
+    std::string startMessage = "Press [Enter] to start" ;
+    std::string gameOverMessage = "Game Over" ;
     
     // Images & Textures
     SDL_Surface *surface = nullptr ;
+    SDL_Texture *fontTex = nullptr ;
     
     // Player & Background Class
     RW::Player player ;
