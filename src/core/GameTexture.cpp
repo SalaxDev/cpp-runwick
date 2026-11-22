@@ -5,6 +5,143 @@
 using namespace RW ;
 
 
+// Enemy Class
+// Private Functions
+void Enemy::animate(float dt) {
+    
+}
+
+bool Enemy::initTextures() {
+    if (!rnd) {
+        SDL_Log("Null Renderer, Can't load Textures: [%s]\n", __FUNCTION__) ;
+        return false ;
+    }
+    
+    enemySkyTex = IMG_LoadTexture(rnd, enemySkyTexLocation.c_str()) ;
+    if (!enemySkyTex) {
+        SDL_Log("Failed to load Enemy Sky Texture [%s]: %s\n", __FUNCTION__, SDL_GetError()) ;
+        return false ;
+    }
+    
+    enemyGroundTex = IMG_LoadTexture(rnd, enemyGroundTexLocation.c_str()) ;
+    if (!enemyGroundTex) {
+        SDL_Log("Failed to load Enemy Ground Texture [%s]: %s\n", __FUNCTION__, SDL_GetError()) ;
+        return false ;
+    }
+    
+    return true ;
+}
+
+
+// Constructor
+Enemy::Enemy(SDL_Renderer *rnd, std::string enemySkyLocation, std::string enemyGroundLocation) {
+    
+}
+
+// Destructor
+Enemy::~Enemy() {
+    if (enemySkyTex) {
+        SDL_DestroyTexture(enemySkyTex) ;
+        enemySkyTex = nullptr ;
+    }
+    
+    if (enemyGroundTex) {
+        SDL_DestroyTexture(enemyGroundTex) ;
+        enemyGroundTex = nullptr ;
+    }
+    
+}
+
+
+// Setters
+Enemy &Enemy::setEnemySkyTexLocation(std::string location) {
+    if (!location.empty()) {
+        enemySkyTexLocation = location ;
+    } else {
+        SDL_Log("Provided location is empty %s\n", __FUNCTION__) ;
+    }
+    return *this ;
+}
+
+Enemy &Enemy::setEnemyGroundTexLocation(std::string location) {
+    if (!location.empty()) {
+        enemyGroundTexLocation = location ;
+    } else {
+        SDL_Log("Provided location is empty %s\n", __FUNCTION__) ;
+    }
+    return *this ;
+}
+
+Enemy &Enemy::setRenderer(SDL_Renderer *&rnd) {
+    if (!rnd) {
+        SDL_Log("No Renderer Detected, nullptr renderer: [%s]\n", __FUNCTION__) ;
+        return *this ;
+    }
+    
+    this->rnd = rnd ;
+    return *this ;
+}
+
+Enemy &Enemy::setReserveArraySize(const int reserveCount) {
+    if (reserveCount < 0) {
+        SDL_Log("Reserve space can't be nagative\n") ;
+        return *this ;
+    }
+    
+    enemies.reserve(reserveCount) ;
+    return *this ;
+}
+
+
+// Getters
+const SDL_FRect &Enemy::getEnemyRect() {
+    return dstRect ;
+}
+
+
+// Functions
+bool Enemy::init(std::random_device &rd) {
+    
+    
+    if (!initTextures()) {
+        bLoadFailed = true ;
+        return false ;
+    }
+    return true ;
+}
+
+void Enemy::update(float dt) {
+    
+}
+
+void Enemy::render() {
+    for (auto enemy : enemies) {
+        switch (enemy.type) {
+            
+            case Base::EnemyType::GROUND: {
+                enemy.y = GROUND_Y ;
+                currentTexture = enemyGroundTex ;
+                break ;
+            }
+            
+            case Base::EnemyType::FLY: {
+                enemy.y = FLY_Y ;
+                currentTexture = enemySkyTex ;
+                break ;
+            }
+            
+            [[unlikely]] default: {
+                SDL_Log("Unexpected Enum Type\n\tNumber: %d\n\t[%s]\n", static_cast<int>(enemy.type), __FUNCTION__) ;
+            }
+        }
+        
+        dstRect.x = enemy.x ;
+        dstRect.y = enemy.y ;
+        SDL_RenderTexture(rnd, currentTexture, &srcRect, &dstRect) ;
+    }
+}
+
+
 // Background Class
 
 // Constructor
@@ -282,7 +419,6 @@ void Player::update(float dt) {
     // Physics Gravity Player
     if (pStatus.bJump) {
         locationRect.y += fPlayerGravity * dt ;
-        
         fPlayerGravity += fGravity * dt * 1.15f;
     }
     

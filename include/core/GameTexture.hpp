@@ -2,9 +2,104 @@
 #define GAME_TEXTURE_HPP
 
 #include <SDL3/SDL.h>
+#include <random>
 #include <string>
+#include <vector>
 
 namespace RW {
+    namespace Base {
+        enum class EnemyType {
+            FLY = 0, GROUND = 1
+        };
+        
+        struct Enemy {
+            bool bAlive ;
+            float x, y, velocity ;
+            EnemyType type ;
+            Enemy(const float startX, const float startY, const float velocity, EnemyType type) noexcept
+                : x(startX), y(startY), velocity(velocity) {}
+        };
+    }
+    
+    // Enemy 
+    class Enemy {
+    private:
+        // Booleans
+        bool bLoadFailed = false ;
+        bool bInitFailed = false ;
+        bool bInited = true ;
+        
+        // Array
+        std::vector<Base::Enemy> enemies ;
+        
+        // SDL3 Variables
+        // Renderer
+        SDL_Renderer *rnd = nullptr ;
+        
+        // Textures
+        SDL_Texture *enemySkyTex = nullptr ;
+        SDL_Texture *enemyGroundTex = nullptr ;
+        SDL_Texture *currentTexture = nullptr ;
+        
+        std::string enemySkyTexLocation ;
+        std::string enemyGroundTexLocation ;
+        
+        // Animation Variables
+        const int FLY_FRAMES = 8 ;
+        const int GROUND_FRAMES = 8 ;
+        
+        const int W_FRAME = 150 ;
+        const int H_FRAME = 150 ;
+        
+        
+        // timer animation
+        int nCurrentFrame = 0 ;
+        int nTotalFrame = 1 ;
+        float fTimer = 0.f ; 
+        const float FRAME_TIME = 0.075f ;
+        
+        // Enemy Rectangle
+        const int GROUND_Y = 380 ;
+        const int FLY_Y = 300 ;
+        const int START_POINT =  1010 ;
+        SDL_FRect srcRect {0, 0, (float) W_FRAME, (float) H_FRAME} ;
+        SDL_FRect dstRect {0, 0, W_FRAME * 1.5f, H_FRAME * 1.5f} ;
+        
+        
+        // Random Generation
+        std::mt19937 gen ;
+        
+        // Time Spawn
+        std::uniform_int_distribution<int> spawnDist ;
+        
+        // Movement
+        std::uniform_int_distribution<int> speedDist ;
+        
+        // Private Functions
+        void animate(float dt) ;
+        bool initTextures() ;
+    public:
+        // Constructor
+        Enemy(SDL_Renderer *rnd = nullptr, std::string enemySkyLocation = "", std::string enemyGroundLocation = "") ;
+        // Destructor
+        ~Enemy() ;
+        
+        // Setters
+        Enemy &setEnemySkyTexLocation(std::string location) ;
+        Enemy &setEnemyGroundTexLocation(std::string location) ;
+        
+        Enemy &setRenderer(SDL_Renderer *&rnd) ;
+        Enemy &setReserveArraySize(const int reserveCount) ;
+        
+        // Getters
+        const SDL_FRect &getEnemyRect() ;
+        
+        // Functions
+        bool init(std::random_device &rd) ;
+        void update(float dt) ;
+        void render() ;
+    };
+    
     class Background {
     private:
         // Booleans
