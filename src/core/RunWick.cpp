@@ -228,6 +228,11 @@ RunWick::RunWick(const WindowSettings windowSettings) : sWindow(windowSettings) 
 // Destructor
 RunWick::~RunWick() {
     
+    if (fontTex) {
+        SDL_DestroyTexture(fontTex) ;
+        fontTex = nullptr ;
+    }
+    
     if (font) {
         TTF_CloseFont(font) ;
         font = nullptr ;
@@ -264,7 +269,7 @@ void RunWick::setRenderColor(SDL_Color color) {
 // Functions
 void RunWick::init() {
     if (!SDL_Init(SDL_INIT_VIDEO)) { 
-        msgShow(MsgStats::ERROR, "Failed to initialize SDL3 VIDEO & AUDIO, Fallback to SW", "Initialization Error") ;
+        msgShow(MsgStats::ERROR, std::format("Failed to initialize SDL3 VIDEO & AUDIO, Fallback to SW, SDL Error: {}", SDL_GetError()).c_str(), "Initialization Error") ; ;
         
         // Experimental, not SW tested (no gpu)
         SDL_SetHint(SDL_HINT_RENDER_DRIVER, "software") ;
