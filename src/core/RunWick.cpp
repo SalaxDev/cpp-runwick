@@ -87,8 +87,8 @@ bool RunWick::initEnemy() {
         .setEnemySkyTexLocation("./data/enemy/flying_eye/fly.png") ;
     
     std::random_device rd ;
-    std::uniform_real_distribution<float> spawn(2, 5) ;
-    std::uniform_real_distribution<float> speed(310.f, 700.f) ; 
+    std::uniform_real_distribution<float> spawn(0.86f, 2.75f) ;
+    std::uniform_real_distribution<float> speed(310.f, 630.f) ; 
     
     enemy.setReserveArraySize(5) ;
     if (!enemy.init(rd, spawn, speed)) {
@@ -204,7 +204,7 @@ void RunWick::updateEvent(float dt) {
     player.update(dt) ;
     if (bStart) [[likely]] {
         bg.update(dt) ;
-        enemy.update(dt) ;
+        enemy.update(dt, player.getPlayerLocation()) ;
     }
 }
 
