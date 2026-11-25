@@ -20,6 +20,23 @@ void Enemy::animate(float dt) {
     }
 }
 
+void Enemy::checkCollision(const SDL_FRect &playerRect) {
+    for (auto &enemy : enemies) {
+        SDL_FRect enemyRCollide = {enemy.x, enemy.y, (float) W_FRAME * 1.5f, (float) H_FRAME * 1.5f} ;
+        enemyRCollide.x += ((W_FRAME / 2.f) * 1.5f) - 27.f ;
+        enemyRCollide.w -= ((H_FRAME / 2.f) * 2.f) + 22.f ;
+        enemyRCollide.y += ((W_FRAME / 2.f) * 1.5f) - 20.f ;
+        enemyRCollide.h -= ((H_FRAME / 2.f) * 2.f) + 26.f ;
+        if (playerRect.x < enemyRCollide.x + enemyRCollide.w &&
+            playerRect.x + playerRect.w > enemyRCollide.x &&
+            playerRect.y < enemyRCollide.y + enemyRCollide.h &&
+            playerRect.y + playerRect.h > enemyRCollide.y
+        ) [[unlikely]] {
+            SDL_Log("Collision Detected\n") ;
+        }
+    }
+}
+
 bool Enemy::initTextures() {
     if (!rnd) {
         SDL_Log("Null Renderer, Can't load Textures: [%s]\n", __FUNCTION__) ;
@@ -102,12 +119,6 @@ Enemy &Enemy::setReserveArraySize(const int reserveCount) {
 }
 
 
-// Getters
-const SDL_FRect &Enemy::getEnemyRect() {
-    return dstRect ;
-}
-
-
 // Functions
 bool Enemy::init(std::random_device &rd, std::uniform_real_distribution<float> &spawnDist, std::uniform_real_distribution<float> speedDist) {
     
@@ -127,9 +138,8 @@ bool Enemy::init(std::random_device &rd, std::uniform_real_distribution<float> &
     return true ;
 }
 
-void Enemy::update(float dt) {
-    fSpawnTimer += dt ;
-    //SDL_Log("Delta Time: %f\nfSpawnTimer:%f\nfCurrentSpawn:%f\n", dt, fSpawnTimer, fCurrentSpawn) ;
+void Enemy::update(float dt, const SDL_FRect &playerRect) {
+    fSpawnTimer += dt ;//SDL_Log("Delta Time: %f\nfSpawnTimer:%f\nfCurrentSpawn:%f\n", dt, fSpawnTimer, fCurrentSpawn) ;
     
     if (fSpawnTimer >= fCurrentSpawn) {
         fCurrentSpawn = spawnDist(gen) ;
@@ -145,9 +155,7 @@ void Enemy::update(float dt) {
             nTotalFrame = GROUND_FRAMES ;
         }
         
-        SDL_Log("Enemy Type: %d\nEnemy Type Dist: %d\n", static_cast<Base::EnemyType>(enemyTypeDist(gen)), enemyTypeDist(gen)) ;
         enemies.push_back({(float) START_POINT, (float) nStartY, speedDist(gen), type, nTotalFrame}) ;
-        SDL_Log("Spawned\n") ;
     }
     
     for (auto &enemy : enemies) {
@@ -163,13 +171,13 @@ void Enemy::update(float dt) {
     while (it != enemies.end()) {
         if (!it->bAlive) {
             it = enemies.erase(it) ;
-            SDL_Log("Removed\n") ;
         } else {
             ++it ;
         }
     }
     
     animate(dt) ;
+    checkCollision(playerRect) ;
 }
 
 void Enemy::render() {
@@ -196,6 +204,12 @@ void Enemy::render() {
         dstRect.y = enemy.y ;
         srcRect.x = enemy.xSource ;
         srcRect.y = enemy.ySource ;
+        SDL_FRect enemyRCollide = {enemy.x, enemy.y, (float) W_FRAME * 1.5f, (float) H_FRAME * 1.5f} ;
+        enemyRCollide.x += ((W_FRAME / 2.f) * 1.5f) - 27.f ;
+        enemyRCollide.w -= ((H_FRAME / 2.f) * 2.f) + 22.f ;
+        enemyRCollide.y += ((W_FRAME / 2.f) * 1.5f) - 20.f ;
+        enemyRCollide.h -= ((H_FRAME / 2.f) * 2.f) + 26.f ;
+        SDL_RenderRect(rnd, &enemyRCollide) ;
         SDL_RenderTextureRotated(rnd, currentTexture, &srcRect, &dstRect, 0, 0, SDL_FLIP_HORIZONTAL) ; ;
     }
 }
@@ -391,9 +405,6 @@ Player::~Player() {
     }
 }
 
-
-// Getters
-
 // Setters
 Player &Player::setRunTexLocation(std::string location) noexcept {
     if (!location.empty()) {
@@ -436,6 +447,16 @@ Player &Player::setRenderer(SDL_Renderer *&renderer) {
     return *this ;
 }
 
+// Getters
+const SDL_FRect &Player::getPlayerLocation() noexcept {
+    playerRCollision = locationRect ;
+    playerRCollision.x += ((W_FRAME / 2.f) * 1.5f) - 24.f ;
+    playerRCollision.w -= ((H_FRAME / 2.f) * 2.f) + 60.f ;
+    playerRCollision.y += ((W_FRAME / 2.f) * 1.5f) - 26.f ;
+    playerRCollision.h -= ((H_FRAME / 2.f) * 1.5f) + 4.f ;
+    
+    return playerRCollision ;
+}
 
 // Functions
 void Player::jump(float dt) {
@@ -443,6 +464,7 @@ void Player::jump(float dt) {
 }
 
 void Player::render() {
+    SDL_RenderRect(rnd, &getPlayerLocation()) ;
     SDL_RenderTexture(rnd, currentTex, &sourceRect, &locationRect) ;
 }
 
