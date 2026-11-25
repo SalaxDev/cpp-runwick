@@ -88,6 +88,7 @@ namespace RW {
         
         // Private Functions
         void animate(float dt) ;
+        void checkCollision(const SDL_FRect &playerRect) ;
         bool initTextures() ;
     public:
         // Constructor
@@ -102,12 +103,10 @@ namespace RW {
         Enemy &setRenderer(SDL_Renderer *&rnd) ;
         Enemy &setReserveArraySize(const int reserveCount) ;
         
-        // Getters
-        const SDL_FRect &getEnemyRect() ;
         
         // Functions
         bool init(std::random_device &rd, std::uniform_real_distribution<float> &spawnDist, std::uniform_real_distribution<float> speedDist);
-        void update(float dt) ;
+        void update(float dt, const SDL_FRect &playerRect) ;
         void render() ;
     };
     
@@ -203,6 +202,7 @@ namespace RW {
         // Player Variables
         SDL_FRect sourceRect {0, 0, (float) W_FRAME, (float) H_FRAME};
         SDL_FRect locationRect {100, GROUND_Y, (float) W_FRAME * 1.5f, (float) H_FRAME * 1.5f} ;
+        SDL_FRect playerRCollision ;
         struct PlayerStatus {
             bool bIdle, bJump, bRun, bDeath ;
             // Constrcutor
@@ -221,7 +221,6 @@ namespace RW {
         // Destructor
         ~Player() ;
         
-        // Getters
         
         // Setters
         Player &setRunTexLocation(std::string location) noexcept ;
@@ -229,6 +228,9 @@ namespace RW {
         Player &setJumpFallTexLocation(std::string location) noexcept ;
         Player &setIdleTexLocation(std::string location) noexcept ;
         Player &setRenderer(SDL_Renderer *&rnd) ;
+        
+        // Getters
+        const SDL_FRect &getPlayerLocation() noexcept ;
         
         // Functions
         void jump(float dt) ;
