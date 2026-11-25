@@ -13,11 +13,14 @@ namespace RW {
         };
         
         struct Enemy {
-            bool bAlive ;
+            bool bAlive = true ;
+            int xSource, ySource ;
+            int nTotalFrame, nFrame = 0 ;
+            float fTimer ;
             float x, y, velocity ;
             EnemyType type ;
-            Enemy(const float startX, const float startY, const float velocity, EnemyType type) noexcept
-                : x(startX), y(startY), velocity(velocity) {}
+            Enemy(const float startX, const float startY, const float velocity, EnemyType type, int totalFrames) noexcept
+                : x(startX), y(startY), velocity(velocity), type(type), nTotalFrame(totalFrames) {}
         };
     }
     
@@ -59,9 +62,12 @@ namespace RW {
         const float FRAME_TIME = 0.075f ;
         
         // Enemy Rectangle
-        const int GROUND_Y = 380 ;
-        const int FLY_Y = 300 ;
+        const int GROUND_Y = 350 ;
+        
+        std::uniform_int_distribution<int> flyDistLocation ;
+        int FLY_Y = 200 ;
         const int START_POINT =  1010 ;
+        
         SDL_FRect srcRect {0, 0, (float) W_FRAME, (float) H_FRAME} ;
         SDL_FRect dstRect {0, 0, W_FRAME * 1.5f, H_FRAME * 1.5f} ;
         
@@ -70,10 +76,15 @@ namespace RW {
         std::mt19937 gen ;
         
         // Time Spawn
-        std::uniform_int_distribution<int> spawnDist ;
+        std::uniform_real_distribution<float> spawnDist ;
+        float fSpawnTimer = 0.f ;
+        float fCurrentSpawn ;
+        
         
         // Movement
-        std::uniform_int_distribution<int> speedDist ;
+        std::uniform_real_distribution<float> speedDist ;
+        
+        std::uniform_int_distribution<int> enemyTypeDist ;
         
         // Private Functions
         void animate(float dt) ;
@@ -95,7 +106,7 @@ namespace RW {
         const SDL_FRect &getEnemyRect() ;
         
         // Functions
-        bool init(std::random_device &rd) ;
+        bool init(std::random_device &rd, std::uniform_real_distribution<float> &spawnDist, std::uniform_real_distribution<float> speedDist);
         void update(float dt) ;
         void render() ;
     };

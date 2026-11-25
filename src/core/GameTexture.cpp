@@ -8,7 +8,16 @@ using namespace RW ;
 // Enemy Class
 // Private Functions
 void Enemy::animate(float dt) {
-    
+    for (auto &enemy : enemies) {
+        enemy.fTimer += dt ;
+        
+        if (enemy.fTimer >= FRAME_TIME) {
+            enemy.fTimer -= FRAME_TIME ;
+            enemy.xSource = W_FRAME * (enemy.nFrame % enemy.nTotalFrame) ;
+            
+            enemy.nFrame = (enemy.nFrame + 1) % enemy.nTotalFrame ;
+        }
+    }
 }
 
 bool Enemy::initTextures() {
@@ -34,8 +43,8 @@ bool Enemy::initTextures() {
 
 
 // Constructor
-Enemy::Enemy(SDL_Renderer *rnd, std::string enemySkyLocation, std::string enemyGroundLocation) {
-    
+Enemy::Enemy(SDL_Renderer *rnd, std::string enemySkyLocation, std::string enemyGroundLocation)
+    : rnd(rnd), enemySkyTexLocation(std::move(enemySkyLocation)), enemyGroundTexLocation(std::move(enemyGroundLocation)) {
 }
 
 // Destructor
@@ -100,22 +109,71 @@ const SDL_FRect &Enemy::getEnemyRect() {
 
 
 // Functions
-bool Enemy::init(std::random_device &rd) {
-    
+bool Enemy::init(std::random_device &rd, std::uniform_real_distribution<float> &spawnDist, std::uniform_real_distribution<float> speedDist) {
     
     if (!initTextures()) {
         bLoadFailed = true ;
         return false ;
     }
+    
+    // Initializing Random Generator
+    gen.seed(rd()) ;
+    this->spawnDist = spawnDist ;
+    this->speedDist = speedDist ;
+    enemyTypeDist = std::uniform_int_distribution<int>(0, 1) ;
+    flyDistLocation = std::uniform_int_distribution<int>(150, 290) ;
+    
+    fCurrentSpawn = spawnDist(gen) ;
     return true ;
 }
 
 void Enemy::update(float dt) {
+    fSpawnTimer += dt ;
+    //SDL_Log("Delta Time: %f\nfSpawnTimer:%f\nfCurrentSpawn:%f\n", dt, fSpawnTimer, fCurrentSpawn) ;
     
+    if (fSpawnTimer >= fCurrentSpawn) {
+        fCurrentSpawn = spawnDist(gen) ;
+        fSpawnTimer = 0.f ;
+        
+        int nStartY ;
+        
+        Base::EnemyType type = static_cast<Base::EnemyType>(enemyTypeDist(gen)) ;
+        if (type == Base::EnemyType::FLY) {
+            nStartY = flyDistLocation(gen) ;
+            nTotalFrame = FLY_FRAMES ;
+        } else if (type == Base::EnemyType::GROUND) {
+            nTotalFrame = GROUND_FRAMES ;
+        }
+        
+        SDL_Log("Enemy Type: %d\nEnemy Type Dist: %d\n", static_cast<Base::EnemyType>(enemyTypeDist(gen)), enemyTypeDist(gen)) ;
+        enemies.push_back({(float) START_POINT, (float) nStartY, speedDist(gen), type, nTotalFrame}) ;
+        SDL_Log("Spawned\n") ;
+    }
+    
+    for (auto &enemy : enemies) {
+        enemy.x -= (enemy.velocity * dt) ;
+        if (enemy.x < -W_FRAME) {
+            enemy.bAlive = false ;
+        }
+        
+        
+    }
+    
+    auto it = enemies.begin() ;
+    while (it != enemies.end()) {
+        if (!it->bAlive) {
+            it = enemies.erase(it) ;
+            SDL_Log("Removed\n") ;
+        } else {
+            ++it ;
+        }
+    }
+    
+    animate(dt) ;
 }
 
 void Enemy::render() {
-    for (auto enemy : enemies) {
+    for (auto &enemy : enemies) {
         switch (enemy.type) {
             
             case Base::EnemyType::GROUND: {
@@ -125,7 +183,6 @@ void Enemy::render() {
             }
             
             case Base::EnemyType::FLY: {
-                enemy.y = FLY_Y ;
                 currentTexture = enemySkyTex ;
                 break ;
             }
@@ -137,7 +194,9 @@ void Enemy::render() {
         
         dstRect.x = enemy.x ;
         dstRect.y = enemy.y ;
-        SDL_RenderTexture(rnd, currentTexture, &srcRect, &dstRect) ;
+        srcRect.x = enemy.xSource ;
+        srcRect.y = enemy.ySource ;
+        SDL_RenderTextureRotated(rnd, currentTexture, &srcRect, &dstRect, 0, 0, SDL_FLIP_HORIZONTAL) ; ;
     }
 }
 
