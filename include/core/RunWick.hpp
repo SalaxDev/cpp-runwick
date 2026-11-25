@@ -50,6 +50,7 @@ private:
     
     // Player & Background Class
     RW::Player player ;
+    RW::Enemy enemy ;
     RW::Background bg ;
     
     // Event Handler
@@ -62,6 +63,7 @@ private:
     // Private Functions
     bool initWindow() ; // Initialization
     bool initPlayer() ; // Player Variables Initialization
+    bool initEnemy() ; // Enemy Initialization
     bool initBackground() ; // Background Variables Initialization
     bool initFont() ; // Font Initialization
     void updateEvent(float dt) ; // Events

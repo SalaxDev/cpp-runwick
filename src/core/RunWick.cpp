@@ -69,6 +69,34 @@ bool RunWick::initPlayer() {
     return true ;
 }
 
+// Enemy Initialization
+bool RunWick::initEnemy() {
+    if (bInitFailed) {
+        SDL_Log("Initialization Failed in previous functions, can't call %s\n", __FUNCTION__) ;
+        return false ;
+    }
+    
+    if (!rnd) {
+        SDL_Log("Renderer is not initialized - [%s]\n", __FUNCTION__) ;
+        return false ;
+    }
+    
+    enemy.setRenderer(rnd) ;
+    
+    enemy.setEnemyGroundTexLocation("./data/enemy/goblin/Run.png")
+        .setEnemySkyTexLocation("./data/enemy/flying_eye/fly.png") ;
+    
+    std::random_device rd ;
+    std::uniform_real_distribution<float> spawn(2, 5) ;
+    std::uniform_real_distribution<float> speed(310.f, 700.f) ; 
+    
+    enemy.setReserveArraySize(5) ;
+    if (!enemy.init(rd, spawn, speed)) {
+        return false ;
+    }
+    return true ;
+}
+
 // Background Variables Initialization
 bool RunWick::initBackground() {
     if (bInitFailed) {
@@ -176,6 +204,7 @@ void RunWick::updateEvent(float dt) {
     player.update(dt) ;
     if (bStart) [[likely]] {
         bg.update(dt) ;
+        enemy.update(dt) ;
     }
 }
 
@@ -185,6 +214,7 @@ void RunWick::updateRender() {
     
     bg.render() ;
     player.render() ;
+    enemy.render() ;
     if (bShowStartMsg) [[unlikely]] {
         SDL_RenderTexture(rnd, fontTex, nullptr, &fontRect) ;
     }
@@ -295,6 +325,10 @@ void RunWick::init() {
     }
     
     if (!initPlayer()) {
+        bInitFailed = true ;
+    }
+    
+    if (!initEnemy()) {
         bInitFailed = true ;
     }
     
